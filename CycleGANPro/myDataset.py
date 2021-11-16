@@ -1,14 +1,15 @@
-# 1、导入包
+# step1:导入包
 import os
 import glob
 import random
-from PIL import  Image
+from PIL import Image
+from torch.utils.data import  Dataset
 import torchvision.transforms as transforms
-from torch.utils.data import  Dataset,DataLoader
 
+# step2:定义Dataset
 class myDataset(Dataset):
     def __init__(self, root = "", transform = None, model = "train"):
-        self.transform = transform
+        self.mytransforms = transforms.Compose(transform)
 
         self.pathA = os.path.join(root, model, "A/*")
         self.pathB = os.path.join(root, model, "B/*")
@@ -20,23 +21,13 @@ class myDataset(Dataset):
         img_pathA = self.listA[i % len(self.listA)]
         img_pathB = random.choice(self.listB)
 
-        imgA = Image.open(img_pathA)
-        imgB = Image.open(img_pathB)
+        imgA = self.mytransforms(Image.open(img_pathA))
+        imgB = self.mytransforms(Image.open(img_pathB))
 
-        return {"A":self.transform(imgA), "B":self.transform(imgB)}
+        return {"A":imgA, "B":imgB}
 
     def __len__(self):
-        return max(len(self.listA), len(self.listB))
+        lenA = len(self.listA)
+        lenB = len(self.listB)
+        return max(lenA, lenB)
 
-if __name__ == "__main__":
-    root = "datasets/apple2orange"
-    mytransforms = transforms.Compose([
-        # transforms.Resize(256),
-        transforms.ToTensor()
-    ])
-    imageDataset = myDataset(root, mytransforms, "train")
-    imageDataloader = DataLoader(imageDataset, batch_size=1, shuffle=True, num_workers=1)
-
-    for i, data in enumerate(imageDataloader):
-        print(i)
-        print(data)

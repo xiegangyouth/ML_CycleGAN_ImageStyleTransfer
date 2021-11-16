@@ -3,7 +3,6 @@ CycleGAN模型2:以DenseNet为生成器骨干网络
 """
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 import math
 
 # 定义密集块的单元层
@@ -33,8 +32,13 @@ class Transition(nn.Module):
         out = self.conv1(F.relu(self.instance_norm2d1(x)))
         return out
 
-# 定义生成器
+# ------------------------------------------------定义生成器------------------------------------------------
 class Generator(nn.Module):
+    """
+    k：网络特征图的增长速率
+    depth:网络深度
+    reduction:转换层衰减因子
+    """
     def __init__(self, k, depth, reduction):
         super(Generator, self).__init__()
         nDenseBlocks = (depth-4) // 3 // 2 # 计算密集块个数
@@ -98,7 +102,7 @@ class Generator(nn.Module):
         out = F.relu(self.instance_norm2d(self.fun(out)))
         return out
 
-#定义判别器
+#------------------------------------------------定义判别器------------------------------------------------
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
@@ -121,15 +125,4 @@ class Discriminator(nn.Module):
         # print(x.size())
         return F.avg_pool2d(x, x.size()[2:]).view(x.size()[0], -1)
 
-
-if __name__=='__main__':
-    G = Generator(k=4, depth=50, reduction=0.4)
-    D = Discriminator()
-    import torch
-    input_tensor = torch.ones((1, 3, 256, 256),dtype=torch.float)
-    out = G(input_tensor)
-    print(out.size())
-
-    out = D(input_tensor)
-    print(out.size())
 
