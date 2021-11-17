@@ -2,7 +2,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from PIL import Image
 import torch
-from models_resnet import Discriminator, Generator
+from models_densenet import Discriminator, Generator # 基于DenseNet
 from utils import ReplayBuffer, LambdaLR, weights_init_normal
 from myDataset import myDataset
 import itertools
@@ -17,8 +17,8 @@ epoch = 0
 decay_epoch = 100
 
 # 创建生成器和判别器
-netG_A2B = Generator().to(device)
-netG_B2A = Generator().to(device)
+netG_A2B = Generator(k=4, depth=50, reduction=0.4).to(device)
+netG_B2A = Generator(k=4, depth=50, reduction=0.4).to(device)
 netD_A = Discriminator().to(device)
 netD_B = Discriminator().to(device)
 

@@ -1,7 +1,7 @@
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import torch
-from models_resnet import  Generator
+from models_densenet import  Generator # 基于DenseNet
 from myDataset import myDataset
 import os
 from torchvision.utils import save_image
@@ -9,11 +9,11 @@ from torchvision.utils import save_image
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # 获取生成器
-netG_A2B = Generator().to(device)
-netG_B2A = Generator().to(device)
+netG_A2B = Generator(k=4, depth=50, reduction=0.4).to(device)
+netG_B2A = Generator(k=4, depth=50, reduction=0.4).to(device)
 # 读取预训练模型
-netG_A2B.load_state_dict(torch.load("models_RES/netG_A2B.pth"))
-netG_B2A.load_state_dict(torch.load("models_RES/netG_B2A.pth"))
+netG_A2B.load_state_dict(torch.load("models_DENS/netG_A2B.pth"))
+netG_B2A.load_state_dict(torch.load("models_DENS/netG_B2A.pth"))
 
 # 测试阶段，不需要反馈
 netG_A2B.eval()
@@ -37,14 +37,12 @@ dataloader = DataLoader(myDataset(data_root,
                         batch_size=1, shuffle=False,
                         num_workers=8)
 
-def fun():
-
-    # 创建输出文件夹
+def FUN():
+    # 创建输出文件路径
     if not os.path.exists("outputs/A"):
         os.makedirs("outputs/A")
     if not os.path.exists("outputs/B"):
         os.makedirs("outputs/B")
-
     for i, batch in enumerate(dataloader):
         real_A = torch.tensor(input_A.copy_(batch['A']), dtype=torch.float).to(device)
         real_B = torch.tensor(input_B.copy_(batch['B']), dtype=torch.float).to(device)
@@ -57,4 +55,4 @@ def fun():
         print(i)
 
 if __name__ == "__main__":
-    fun()
+    FUN()
